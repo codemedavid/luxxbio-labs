@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShieldCheck, Package, CreditCard, Activity, Copy, Check, MessageCircle, Tag, Upload, Database, Lock, Truck, Facebook, Phone } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Package, CreditCard, Activity, Copy, Check, MessageCircle, Tag, Upload, Database, Lock, Truck } from 'lucide-react';
 import type { CartItem } from '../types';
 import { usePaymentMethods } from '../hooks/usePaymentMethods';
 import { useShippingLocations } from '../hooks/useShippingLocations';
@@ -36,7 +36,6 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack, clea
 
     // Payment
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
-    const [contactMethod, setContactMethod] = useState<'facebook' | 'phone'>('facebook');
     const [notes, setNotes] = useState('');
 
     const [orderMessage, setOrderMessage] = useState<string>('');
@@ -256,7 +255,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack, clea
                     payment_method_id: paymentMethod?.id || null,
                     payment_method_name: paymentMethod?.name || null,
                     payment_proof_url: paymentProofUrl,
-                    contact_method: contactMethod || null,
+                    contact_method: 'whatsapp',
                     notes: notes.trim() || null,
                     order_status: 'new',
                     payment_status: 'pending',
@@ -360,7 +359,7 @@ ${paymentMethod?.name || 'N/A'}
 ${paymentProofUrl ? 'Screenshot attached to order.' : 'Pending'}
 
 📱 PREFERRED CONTACT METHOD
-${contactMethod === 'facebook' ? 'Facebook Page (https://www.facebook.com/share/14hsbXd8st3/)' : 'WhatsApp — 09998207315'}
+WhatsApp — 09068488131
 
 📋 ORDER NUMBER: ${customOrderNumber}
 
@@ -383,9 +382,10 @@ Please confirm this order. Thank you!
             // Show confirmation
             setStep('confirmation');
 
-            // Auto-open Facebook page
+            // Auto-open WhatsApp
             setTimeout(() => {
-                window.open('https://www.facebook.com/share/14hsbXd8st3/', '_blank');
+                const url = `https://wa.me/639068488131?text=${encodeURIComponent(orderDetails)}`;
+                window.open(url, '_blank');
             }, 1500);
         } catch (error) {
             console.error('❌ Error placing order:', error);
@@ -405,18 +405,8 @@ Please confirm this order. Thank you!
         }
     };
 
-    const handleOpenFacebook = async () => {
-        try {
-            await navigator.clipboard.writeText(orderMessage);
-            setCopied(true);
-        } catch (err) {
-            console.error('Failed to copy before opening Facebook:', err);
-        }
-        window.open('https://www.facebook.com/share/14hsbXd8st3/', '_blank');
-    };
-
     const handleOpenWhatsApp = () => {
-        const url = `https://wa.me/639998207315?text=${encodeURIComponent(orderMessage)}`;
+        const url = `https://wa.me/639068488131?text=${encodeURIComponent(orderMessage)}`;
         window.open(url, '_blank');
     };
 
@@ -432,7 +422,7 @@ Please confirm this order. Thank you!
                             Order Confirmed
                         </h1>
                         <p className="text-gray-600 mb-4 text-base md:text-lg leading-relaxed">
-                            Your order details have been pre-filled. Send them via our Facebook page or call us to finalize your order!
+                            Your order details have been pre-filled. Send them via WhatsApp to finalize your order!
                         </p>
 
                         {/* Order ID Display */}
@@ -486,14 +476,6 @@ Please confirm this order. Thank you!
                         {/* Action Buttons */}
                         <div className="space-y-3 mb-8">
                             <button
-                                onClick={handleOpenFacebook}
-                                className="w-full py-4 text-base flex items-center justify-center gap-2 shadow-lg rounded bg-[#0866ff] hover:bg-[#0556db] text-white font-medium transition-all"
-                            >
-                                <MessageCircle className="w-5 h-5" />
-                                Open Facebook Page & Paste
-                            </button>
-
-                            <button
                                 onClick={handleOpenWhatsApp}
                                 className="w-full py-4 text-base flex items-center justify-center gap-2 shadow-lg rounded bg-[#25D366] hover:bg-[#1ebe5d] text-white font-medium transition-all"
                             >
@@ -502,7 +484,7 @@ Please confirm this order. Thank you!
                             </button>
 
                             <p className="text-sm text-gray-500">
-                                Your order details are auto-copied. Send the message to our <span className="font-bold">Facebook Page</span> or via <span className="font-bold">WhatsApp 09998207315</span>.
+                                Your order details are auto-copied. Send the message via <span className="font-bold">WhatsApp 09068488131</span>.
                             </p>
                         </div>
 
@@ -971,56 +953,6 @@ Please confirm this order. Thank you!
                             </div>
                         </div>
 
-
-                    {/* Preferred Contact Method */}
-                    <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100" style={{ boxShadow: '0 1px 3px rgba(10,10,10,0.04), 0 8px 28px rgba(10,10,10,0.05)' }}>
-                        <div className="flex items-center mb-5 pb-5 border-b" style={{ borderColor: 'rgba(10,10,10,0.06)' }}>
-                            <h2 className="font-heading text-xl font-semibold text-charcoal-900 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FFF9E6 0%, #FFE388 100%)', color: '#957515' }}>
-                                    <MessageCircle className="w-5 h-5" />
-                                </div>
-                                Preferred Contact Method
-                            </h2>
-                        </div>
-                        <p className="text-xs text-gray-500 mb-5 -mt-1">Choose how you'd like us to confirm your order and send tracking updates.</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setContactMethod('facebook')}
-                                className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${contactMethod === 'facebook'
-                                    ? 'border-brand-500 bg-brand-50/40 shadow-[0_4px_18px_rgba(212,175,55,0.18)]'
-                                    : 'border-gray-200 hover:border-brand-300 hover:bg-brand-50/20'
-                                    }`}
-                            >
-                                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#0A0A0A', color: '#FFE388' }}>
-                                    <Facebook className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-charcoal-900 text-sm">Facebook Page</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">Message us on Facebook</p>
-                                </div>
-                                {contactMethod === 'facebook' && <Check className="w-5 h-5 flex-shrink-0" style={{ color: '#B8941F' }} />}
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setContactMethod('phone')}
-                                className={`p-4 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${contactMethod === 'phone'
-                                    ? 'border-brand-500 bg-brand-50/40 shadow-[0_4px_18px_rgba(212,175,55,0.18)]'
-                                    : 'border-gray-200 hover:border-brand-300 hover:bg-brand-50/20'
-                                    }`}
-                            >
-                                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#0A0A0A', color: '#FFE388' }}>
-                                    <Phone className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-charcoal-900 text-sm">WhatsApp</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">09998207315</p>
-                                </div>
-                                {contactMethod === 'phone' && <Check className="w-5 h-5 flex-shrink-0" style={{ color: '#B8941F' }} />}
-                            </button>
-                        </div>
-                    </div>
 
                     {/* Courier Selection */}
                     <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100" style={{ boxShadow: '0 1px 3px rgba(10,10,10,0.04), 0 8px 28px rgba(10,10,10,0.05)' }}>

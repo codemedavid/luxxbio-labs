@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlaskConical, Truck, HelpCircle, FileText, BookOpen, Leaf, Facebook, Phone } from 'lucide-react';
+import { FlaskConical, Truck, HelpCircle, FileText, BookOpen, Leaf, MessageCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
 
             <div className="flex flex-col gap-2.5">
               <a
-                href="https://www.facebook.com/share/14hsbXd8st3/"
+                href="https://wa.me/639068488131"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 font-sans text-sm transition-colors"
@@ -44,18 +44,8 @@ const Footer: React.FC = () => {
                 onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#FFE388'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.6)'; }}
               >
-                <Facebook className="w-4 h-4" style={{ color: '#E5BE3A' }} />
-                Facebook Page
-              </a>
-              <a
-                href="tel:09998207315"
-                className="flex items-center gap-2 font-sans text-sm transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#FFE388'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.6)'; }}
-              >
-                <Phone className="w-4 h-4" style={{ color: '#E5BE3A' }} />
-                09998207315
+                <MessageCircle className="w-4 h-4" style={{ color: '#E5BE3A' }} />
+                WhatsApp 09068488131
               </a>
             </div>
           </div>
