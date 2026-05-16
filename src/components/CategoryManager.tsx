@@ -82,15 +82,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
   };
 
   const handleSaveCategory = async () => {
-    if (!formData.id || !formData.name || !formData.icon) {
+    if (!formData.name || !formData.icon) {
       alert('Please fill in all required fields');
-      return;
-    }
-
-    // Validate ID format (kebab-case)
-    const idRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-    if (!idRegex.test(formData.id)) {
-      alert('Category ID must be in kebab-case format (e.g., "hot-drinks", "cold-beverages")');
       return;
     }
 
@@ -98,7 +91,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
       if (editingCategory) {
         await updateCategory(editingCategory.id, formData);
       } else {
-        await addCategory(formData);
+        const { id: _omit, ...newCategory } = formData;
+        await addCategory(newCategory);
       }
       setCurrentView('list');
       setEditingCategory(null);
@@ -112,21 +106,8 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
     setEditingCategory(null);
   };
 
-  const generateIdFromName = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
-
   const handleNameChange = (name: string) => {
-    setFormData({
-      ...formData,
-      name,
-      id: currentView === 'add' ? generateIdFromName(name) : formData.id
-    });
+    setFormData({ ...formData, name });
   };
 
   // Form View (Add/Edit)
@@ -183,26 +164,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
                   className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-500 focus:border-navy-900 transition-all text-sm text-gray-900"
                   placeholder="e.g., Research Peptides"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-900 mb-1.5 sm:mb-2">
-                  Category ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold-500 focus:border-navy-900 transition-all text-xs sm:text-sm font-mono disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-500 text-gray-900"
-                  placeholder="e.g., research-peptides"
-                  disabled={currentView === 'edit'}
-                />
-                <p className="text-[10px] sm:text-xs text-gray-500 mt-1.5 sm:mt-2">
-                  {currentView === 'edit'
-                    ? 'Category ID cannot be changed after creation'
-                    : 'Automatically generated from name, or enter manually in kebab-case format'
-                  }
-                </p>
               </div>
 
               <div>

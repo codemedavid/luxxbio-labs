@@ -55,17 +55,19 @@ export const useCategories = () => {
     }
   };
 
-  const addCategory = async (category: Omit<Category, 'created_at' | 'updated_at'>) => {
+  const addCategory = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at'> & { id?: string }) => {
     try {
+      const payload: Record<string, unknown> = {
+        name: category.name,
+        icon: category.icon,
+        sort_order: category.sort_order,
+        active: category.active,
+      };
+      if (category.id) payload.id = category.id;
+
       const { data, error: insertError } = await supabase
         .from('categories')
-        .insert({
-          id: category.id,
-          name: category.name,
-          icon: category.icon,
-          sort_order: category.sort_order,
-          active: category.active
-        })
+        .insert(payload)
         .select()
         .single();
 

@@ -46,18 +46,14 @@ const OrderTracking: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .rpc('get_order_details', { order_id_input: orderId.trim() })
-                .single();
+                .maybeSingle();
 
             if (error) {
-                if (error.code === 'PGRST116') {
-                    setError('Order not found. Please check your Order ID and try again.');
-                } else {
-                    throw error;
-                }
+                throw error;
             } else if (data) {
                 setOrder(data as TrackingOrder);
             } else {
-                setError('Order not found.');
+                setError('Order not found. Please check your Order ID and try again.');
             }
         } catch (err) {
             console.error('Error fetching order:', err);

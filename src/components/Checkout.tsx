@@ -11,9 +11,10 @@ interface CheckoutProps {
     cartItems: CartItem[];
     totalPrice: number;
     onBack: () => void;
+    clearCart: () => void;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) => {
+const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack, clearCart }) => {
     const { paymentMethods } = usePaymentMethods();
     const { locations: shippingLocations } = useShippingLocations();
     const { couriers } = useCouriers();
@@ -43,6 +44,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
     const [contactOpened] = useState(false);
 
     const [orderNumber, setOrderNumber] = useState<string>('');
+
+    // Terms & Conditions
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
 
     // Payment Proof
     const [paymentProof, setPaymentProof] = useState<File | null>(null);
@@ -182,6 +187,11 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
 
         if (!paymentProof) {
             alert('Please upload a screenshot of your payment proof to proceed.');
+            return;
+        }
+
+        if (!agreedToTerms) {
+            alert('Please read and agree to the Terms & Conditions before placing your order.');
             return;
         }
 
@@ -366,6 +376,9 @@ Please confirm this order. Thank you!
             } catch (err) {
                 console.error('Failed to auto-copy:', err);
             }
+
+            // Clear the cart now that the order is saved
+            clearCart();
 
             // Show confirmation
             setStep('confirmation');
@@ -686,9 +699,56 @@ Please confirm this order. Thank you!
                                 />
                             </div>
 
+                            {/* Terms & Conditions */}
+                            <div className="bg-white rounded shadow-clinical p-6 border border-gray-100">
+                                <h2 className="font-heading text-lg font-bold text-charcoal-900 mb-2 flex items-center gap-2">
+                                    <ShieldCheck className="w-5 h-5 text-brand-600" />
+                                    Terms & Conditions
+                                </h2>
+                                <p className="text-xs text-gray-500 mb-3">
+                                    Please scroll through and read our Terms & Conditions before placing your order.
+                                </p>
+                                <div
+                                    onScroll={(e) => {
+                                        const el = e.currentTarget;
+                                        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) {
+                                            setHasScrolledTerms(true);
+                                        }
+                                    }}
+                                    className="h-48 overflow-y-auto border border-gray-200 rounded p-4 bg-gray-50 text-xs text-gray-700 leading-relaxed space-y-3"
+                                >
+                                    <p><strong>1. Research Use Only.</strong> All products sold by LuxxBio Labs are intended strictly for in-vitro research and laboratory use. They are not for human or animal consumption, diagnostic, therapeutic, cosmetic, or any other clinical use. By placing this order you confirm that you are a qualified researcher and will use the products solely for lawful research purposes.</p>
+                                    <p><strong>2. Eligibility.</strong> You must be at least 21 years of age and legally permitted to purchase research compounds in your jurisdiction. You are solely responsible for ensuring that ordering, receiving, and handling these products complies with the laws of your country, state, and locality.</p>
+                                    <p><strong>3. Order Acceptance & Payment.</strong> All orders are subject to verification and acceptance. Payment must be completed in full and proof of payment submitted before the order is processed. Orders without verified payment will not be released.</p>
+                                    <p><strong>4. Shipping & Delivery.</strong> Delivery timelines are estimates and may vary based on courier, location, and external factors beyond our control. Risk of loss transfers to you once the package is handed to the courier. Tracking will be provided once your order has shipped.</p>
+                                    <p><strong>5. Returns & Refunds.</strong> Due to the sensitive nature of research compounds, all sales are final. Refunds or replacements are issued only if the item arrives damaged, defective, or incorrect, and only when reported within 48 hours of delivery with photographic evidence.</p>
+                                    <p><strong>6. Limitation of Liability.</strong> LuxxBio Labs is not liable for any direct, indirect, incidental, or consequential damages arising from the misuse, handling, or storage of our products. The customer assumes full responsibility upon receipt.</p>
+                                    <p><strong>7. Privacy.</strong> Information you provide is used only to process your order and fulfill delivery. We do not sell or share your data with third parties beyond what is necessary for shipping and payment processing.</p>
+                                    <p><strong>8. Agreement.</strong> By checking the box below, you confirm that you have read, understood, and agree to be bound by these Terms & Conditions.</p>
+                                </div>
+
+                                <label className={`mt-4 flex items-start gap-3 cursor-pointer select-none ${!hasScrolledTerms ? 'opacity-60' : ''}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={agreedToTerms}
+                                        disabled={!hasScrolledTerms}
+                                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                        className="mt-1 w-4 h-4 accent-brand-600 cursor-pointer disabled:cursor-not-allowed"
+                                    />
+                                    <span className="text-sm text-charcoal-900">
+                                        I have read and agree to the Terms & Conditions.
+                                        {!hasScrolledTerms && (
+                                            <span className="block text-xs text-gray-500 mt-0.5">
+                                                Scroll to the bottom of the terms to enable this checkbox.
+                                            </span>
+                                        )}
+                                    </span>
+                                </label>
+                            </div>
+
                             <button
                                 onClick={handlePlaceOrder}
-                                disabled={!paymentProof || isUploadingProof}
+                                disabled={!paymentProof || isUploadingProof || !agreedToTerms}
                                 className="w-full btn-primary py-4 text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 {isUploadingProof ? 'Uploading Proof...' : 'Complete Order'}
