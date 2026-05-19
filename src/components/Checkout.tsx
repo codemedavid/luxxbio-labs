@@ -293,6 +293,24 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack, clea
 
             setOrderNumber(customOrderNumber);
 
+            try {
+                const HISTORY_KEY = 'luxxbio_order_history';
+                const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                const entry = {
+                    order_number: customOrderNumber,
+                    placed_at: new Date().toISOString(),
+                    customer_name: fullName,
+                    customer_email: email,
+                    total: finalTotal,
+                    item_count: cartItems.reduce((sum, i) => sum + i.quantity, 0),
+                };
+                const filtered = existing.filter((e: any) => e.order_number !== customOrderNumber);
+                const next = [entry, ...filtered].slice(0, 20);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+            } catch (e) {
+                console.warn('Could not save order to local history:', e);
+            }
+
             // Get current date and time
             const now = new Date();
             const dateTimeStamp = now.toLocaleString('en-PH', {
@@ -359,7 +377,7 @@ ${paymentMethod?.name || 'N/A'}
 ${paymentProofUrl ? 'Screenshot attached to order.' : 'Pending'}
 
 📱 PREFERRED CONTACT METHOD
-WhatsApp — 09068488131
+WhatsApp — 09998207315
 
 📋 ORDER NUMBER: ${customOrderNumber}
 
@@ -384,7 +402,7 @@ Please confirm this order. Thank you!
 
             // Auto-open WhatsApp
             setTimeout(() => {
-                const url = `https://wa.me/639068488131?text=${encodeURIComponent(orderDetails)}`;
+                const url = `https://wa.me/639998207315?text=${encodeURIComponent(orderDetails)}`;
                 window.open(url, '_blank');
             }, 1500);
         } catch (error) {
@@ -406,7 +424,7 @@ Please confirm this order. Thank you!
     };
 
     const handleOpenWhatsApp = () => {
-        const url = `https://wa.me/639068488131?text=${encodeURIComponent(orderMessage)}`;
+        const url = `https://wa.me/639998207315?text=${encodeURIComponent(orderMessage)}`;
         window.open(url, '_blank');
     };
 
@@ -433,6 +451,10 @@ Please confirm this order. Thank you!
                                     {orderNumber}
                                 </p>
                                 <p className="text-xs text-gray-500 mt-2">Use this reference for tracking and support</p>
+                                <p className="text-xs text-emerald-700 mt-2 flex items-center justify-center gap-1.5">
+                                    <Check className="w-3.5 h-3.5" />
+                                    Saved to this device — you can find it later under <a href="/track-order" className="underline font-semibold ml-1">Track Order</a>.
+                                </p>
                             </div>
                         )}
 
@@ -484,7 +506,7 @@ Please confirm this order. Thank you!
                             </button>
 
                             <p className="text-sm text-gray-500">
-                                Your order details are auto-copied. Send the message via <span className="font-bold">WhatsApp 09068488131</span>.
+                                Your order details are auto-copied. Send the message via <span className="font-bold">WhatsApp 09998207315</span>.
                             </p>
                         </div>
 

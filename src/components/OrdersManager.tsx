@@ -714,13 +714,13 @@ const OrderDetailsView: React.FC<OrderDetailsViewProps> = ({
 }) => {
   const { couriers } = useCouriers();
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number || '');
-  const [shippingProvider, setShippingProvider] = useState(order.shipping_provider || 'lbc');
+  const [shippingProvider, setShippingProvider] = useState(order.shipping_provider || 'jnt');
   const [shippingNote, setShippingNote] = useState(order.shipping_note || '');
 
   // Update local state when order changes
   useEffect(() => {
     setTrackingNumber(order.tracking_number || '');
-    setShippingProvider(order.shipping_provider || 'lbc');
+    setShippingProvider(order.shipping_provider || 'jnt');
     setShippingNote(order.shipping_note || '');
   }, [order]);
 

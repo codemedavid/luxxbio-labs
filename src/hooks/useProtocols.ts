@@ -29,7 +29,7 @@ export function useProtocols() {
             const { data, error } = await supabase
                 .from('protocols')
                 .select('*')
-                .order('sort_order', { ascending: true });
+                .order('name', { ascending: true });
 
             if (error) throw error;
             setProtocols(data || []);

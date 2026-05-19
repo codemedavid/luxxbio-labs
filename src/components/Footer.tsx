@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
 
             <div className="flex flex-col gap-2.5">
               <a
-                href="https://wa.me/639068488131"
+                href="https://wa.me/639998207315"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 font-sans text-sm transition-colors"
@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
                 onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.6)'; }}
               >
                 <MessageCircle className="w-4 h-4" style={{ color: '#E5BE3A' }} />
-                WhatsApp 09068488131
+                WhatsApp 09998207315
               </a>
             </div>
           </div>

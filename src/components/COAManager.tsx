@@ -39,7 +39,7 @@ const COAManager: React.FC<COAManagerProps> = ({ onBack }) => {
     image_url: '/coa/',
     featured: false,
     manufacturer: 'peptalk.ph',
-    laboratory: 'Janoshik + Chromate',
+    laboratory: 'Janoshik Analytical',
   });
 
   useEffect(() => {

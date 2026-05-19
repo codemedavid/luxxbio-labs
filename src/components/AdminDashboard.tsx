@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, ArrowLeft, TrendingUp, Package, Users, FolderOpen, CreditCard, Sparkles, Layers, Shield, RefreshCw, Warehouse, ShoppingCart, HelpCircle, MapPin, Tag, Truck } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, ArrowLeft, TrendingUp, Package, Users, FolderOpen, CreditCard, Sparkles, Layers, Shield, RefreshCw, Warehouse, ShoppingCart, HelpCircle, MapPin, Tag, Truck, FlaskConical } from 'lucide-react';
 import type { Product } from '../types';
 import { useMenu } from '../hooks/useMenu';
 import { useCategories } from '../hooks/useCategories';
@@ -1035,6 +1035,15 @@ const AdminDashboard: React.FC = () => {
                       >
                         <Layers className="h-4 w-4" />
                       </button>
+                      <a
+                        href={`https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(product.name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                        title={`Research ${product.name} on PubMed`}
+                      >
+                        <FlaskConical className="h-4 w-4" />
+                      </a>
                       <button
                         onClick={() => handleEditProduct(product)}
                         disabled={isProcessing}
@@ -1186,6 +1195,15 @@ const AdminDashboard: React.FC = () => {
                             >
                               <Layers className="h-3.5 w-3.5" />
                             </button>
+                            <a
+                              href={`https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(product.name)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                              title={`Research ${product.name} on PubMed`}
+                            >
+                              <FlaskConical className="h-3.5 w-3.5" />
+                            </a>
                             <button
                               onClick={() => handleEditProduct(product)}
                               disabled={isProcessing}

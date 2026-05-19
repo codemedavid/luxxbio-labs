@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Save, X, Eye, EyeOff, FlaskConical } from 'lucide-react';
 import { useProtocols, Protocol } from '../hooks/useProtocols';
 import ImageUpload from './ImageUpload';
 
@@ -327,6 +327,15 @@ const ProtocolManager: React.FC<ProtocolManagerProps> = ({ onBack }) => {
                                     </div>
 
                                     <div className="flex items-center gap-2">
+                                        <a
+                                            href={`https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(protocol.name)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            title={`Research ${protocol.name} on PubMed`}
+                                        >
+                                            <FlaskConical className="w-4 h-4" />
+                                        </a>
                                         <button
                                             onClick={() => handleToggleActive(protocol.id, protocol.active)}
                                             disabled={isProcessing}

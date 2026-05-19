@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
-import { Search, Package, Truck, CheckCircle, Clock, AlertCircle, ArrowRight, ExternalLink, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Package, Truck, CheckCircle, Clock, AlertCircle, ArrowRight, ExternalLink, ArrowLeft, History, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+const ORDER_HISTORY_KEY = 'luxxbio_order_history';
+
+interface OrderHistoryEntry {
+    order_number: string;
+    placed_at: string;
+    customer_name?: string;
+    customer_email?: string;
+    total?: number;
+    item_count?: number;
+}
+
+const loadOrderHistory = (): OrderHistoryEntry[] => {
+    try {
+        const raw = localStorage.getItem(ORDER_HISTORY_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
 
 const GOLD = '#B8941F';
 const INK = '#0A0A0A';
 const MUTED = '#6b6b6b';
 const LINE = 'rgba(10,10,10,0.08)';
 const SURFACE = '#fafaf7';
+const ADMIN_FEE = 300;
 
 interface TrackingOrder {
     id: string;
@@ -33,10 +56,15 @@ const OrderTracking: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
+    const [orderHistory, setOrderHistory] = useState<OrderHistoryEntry[]>([]);
 
-    const handleTrack = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!orderId.trim()) return;
+    useEffect(() => {
+        setOrderHistory(loadOrderHistory());
+    }, []);
+
+    const trackOrderByNumber = async (rawId: string) => {
+        const trimmed = rawId.trim();
+        if (!trimmed) return;
 
         setLoading(true);
         setError(null);
@@ -45,7 +73,7 @@ const OrderTracking: React.FC = () => {
 
         try {
             const { data, error } = await supabase
-                .rpc('get_order_details', { order_id_input: orderId.trim() })
+                .rpc('get_order_details', { order_id_input: trimmed })
                 .maybeSingle();
 
             if (error) {
@@ -63,6 +91,37 @@ const OrderTracking: React.FC = () => {
         }
     };
 
+    const handleTrack = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await trackOrderByNumber(orderId);
+    };
+
+    const handleHistoryClick = async (entry: OrderHistoryEntry) => {
+        setOrderId(entry.order_number);
+        await trackOrderByNumber(entry.order_number);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleRemoveHistory = (orderNumber: string) => {
+        const next = orderHistory.filter(e => e.order_number !== orderNumber);
+        setOrderHistory(next);
+        try {
+            localStorage.setItem(ORDER_HISTORY_KEY, JSON.stringify(next));
+        } catch {
+            /* ignore */
+        }
+    };
+
+    const handleClearHistory = () => {
+        if (!confirm('Clear all saved order numbers from this device?')) return;
+        setOrderHistory([]);
+        try {
+            localStorage.removeItem(ORDER_HISTORY_KEY);
+        } catch {
+            /* ignore */
+        }
+    };
+
     const getStatusStep = (status: string) => {
         const steps = ['new', 'confirmed', 'processing', 'shipped', 'delivered'];
         const statusIndex = steps.indexOf(status);
@@ -74,22 +133,19 @@ const OrderTracking: React.FC = () => {
 
     const providerLabel = (p: string | null) => {
         switch (p) {
-            case 'lbc': return 'LBC Express';
             case 'lalamove': return 'Lalamove';
             case 'maxim': return 'Maxim';
             case 'spx': return 'SPX Express';
-            case 'jt': return 'J&T Express';
             default: return 'J&T Express';
         }
     };
 
     const trackHref = (p: string | null, num: string) => {
         switch (p) {
-            case 'lbc': return `https://www.lbcexpress.com/track/?tracking_no=${num}`;
             case 'lalamove': return 'https://web.lalamove.com/';
             case 'maxim': return 'https://taximaxim.com/';
             case 'spx': return 'https://spx.ph/track';
-            default: return `https://www.jtexpress.ph/trajectoryQuery?bills=${num}`;
+            default: return `https://www.jtexpress.ph/index/query/gzquery.html?bills=${num}`;
         }
     };
 
@@ -132,6 +188,11 @@ const OrderTracking: React.FC = () => {
                             style={{ color: 'rgba(255,255,255,0.65)' }}
                         >
                             Enter your order number to check the current status of your shipment.
+                            {orderHistory.length > 0 && (
+                                <span className="block mt-2 text-xs" style={{ color: GOLD }}>
+                                    Forgot your order number? Check your saved history below.
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -186,6 +247,73 @@ const OrderTracking: React.FC = () => {
                         </button>
                     </form>
                 </div>
+
+                {/* Order History (saved on this device) */}
+                {orderHistory.length > 0 && (
+                    <div
+                        className="rounded-2xl p-5 md:p-6 mb-8"
+                        style={{ background: '#ffffff', border: `1px solid ${LINE}` }}
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <History className="w-4 h-4" style={{ color: GOLD }} />
+                                <h3 className="font-heading font-semibold text-sm" style={{ color: INK }}>
+                                    Recent orders on this device
+                                </h3>
+                            </div>
+                            <button
+                                onClick={handleClearHistory}
+                                className="text-[10px] font-sans uppercase tracking-[0.14em] hover:opacity-70 transition-opacity"
+                                style={{ color: MUTED }}
+                            >
+                                Clear all
+                            </button>
+                        </div>
+                        <p className="font-sans text-xs mb-4" style={{ color: MUTED }}>
+                            Tap an order to track it instantly. Stored locally — clears if you wipe browser data.
+                        </p>
+                        <ul className="space-y-2">
+                            {orderHistory.map((entry) => (
+                                <li
+                                    key={entry.order_number}
+                                    className="flex items-center gap-2"
+                                >
+                                    <button
+                                        onClick={() => handleHistoryClick(entry)}
+                                        className="flex-1 flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-left transition-all hover:shadow-sm"
+                                        style={{ background: SURFACE, border: `1px solid ${LINE}` }}
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="font-mono text-sm font-semibold" style={{ color: INK }}>
+                                                {entry.order_number}
+                                            </p>
+                                            <p className="font-sans text-[11px] mt-0.5" style={{ color: MUTED }}>
+                                                {new Date(entry.placed_at).toLocaleString('en-PH', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                    hour: 'numeric',
+                                                    minute: '2-digit',
+                                                })}
+                                                {entry.item_count != null && ` · ${entry.item_count} item${entry.item_count === 1 ? '' : 's'}`}
+                                                {entry.total != null && ` · ₱${entry.total.toLocaleString()}`}
+                                            </p>
+                                        </div>
+                                        <ArrowRight className="w-4 h-4 flex-shrink-0" style={{ color: GOLD }} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleRemoveHistory(entry.order_number)}
+                                        className="p-2 rounded-xl transition-colors hover:bg-gray-100"
+                                        title="Remove from history"
+                                        aria-label="Remove from history"
+                                    >
+                                        <Trash2 className="w-4 h-4" style={{ color: MUTED }} />
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 {/* Error */}
                 {error && (
@@ -367,15 +495,29 @@ const OrderTracking: React.FC = () => {
                                                     </div>
                                                 ))}
                                             </div>
-                                            {order.discount_applied && order.discount_applied > 0 && (
-                                                <div className="flex justify-between font-sans text-xs pt-2 mb-1" style={{ color: GOLD }}>
-                                                    <span>Discount ({order.promo_code || 'Promo'})</span>
-                                                    <span>−₱{order.discount_applied.toLocaleString()}</span>
+                                            <div className="space-y-1.5 pt-2 mb-1 border-t" style={{ borderColor: LINE }}>
+                                                <div className="flex justify-between font-sans text-xs pt-2" style={{ color: MUTED }}>
+                                                    <span>Subtotal</span>
+                                                    <span style={{ color: INK }}>₱{order.total_price.toLocaleString()}</span>
                                                 </div>
-                                            )}
-                                            <div className="flex justify-between items-center pt-3 font-heading font-semibold text-base" style={{ color: INK, borderTop: `1px solid ${LINE}` }}>
+                                                <div className="flex justify-between font-sans text-xs" style={{ color: MUTED }}>
+                                                    <span>Shipping Fee</span>
+                                                    <span style={{ color: INK }}>₱{(order.shipping_fee || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between font-sans text-xs" style={{ color: MUTED }}>
+                                                    <span>Admin Fee</span>
+                                                    <span style={{ color: INK }}>₱{ADMIN_FEE.toLocaleString()}</span>
+                                                </div>
+                                                {order.discount_applied && order.discount_applied > 0 && (
+                                                    <div className="flex justify-between font-sans text-xs" style={{ color: GOLD }}>
+                                                        <span>Discount ({order.promo_code || 'Promo'})</span>
+                                                        <span>−₱{order.discount_applied.toLocaleString()}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex justify-between items-center pt-3 mt-1 font-heading font-semibold text-base" style={{ color: INK, borderTop: `1px solid ${LINE}` }}>
                                                 <span>Total</span>
-                                                <span>₱{(order.total_price + (order.shipping_fee || 0)).toLocaleString()}</span>
+                                                <span>₱{(order.total_price + (order.shipping_fee || 0) + ADMIN_FEE).toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>
