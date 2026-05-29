@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, FlaskConical, Syringe, Thermometer, Clock, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Syringe, Thermometer, Clock, ChevronDown, ChevronUp, BookOpen, Search, X } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
 import { useCart } from '../hooks/useCart';
@@ -16,6 +16,7 @@ const ProtocolGuide: React.FC = () => {
     const { protocols, loading } = useProtocols();
     const [expandedProtocol, setExpandedProtocol] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const toggleProtocol = (id: string) => {
         setExpandedProtocol(expandedProtocol === id ? null : id);
@@ -27,9 +28,25 @@ const ProtocolGuide: React.FC = () => {
 
     const activeProtocols = protocols.filter(p => p.active);
     const categories = ['all', ...Array.from(new Set(activeProtocols.map(p => p.category)))];
-    const filteredProtocols = selectedCategory === 'all'
-        ? activeProtocols
-        : activeProtocols.filter(p => p.category === selectedCategory);
+    const query = searchQuery.trim().toLowerCase();
+    const filteredProtocols = activeProtocols
+        .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
+        .filter(p => {
+            if (!query) return true;
+            const haystack = [
+                p.name,
+                p.category,
+                p.dosage,
+                p.frequency,
+                p.duration,
+                p.storage,
+                ...(p.notes || []),
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return haystack.includes(query);
+        });
 
     return (
         <div className="min-h-screen" style={{ background: '#ffffff' }}>
@@ -162,22 +179,52 @@ const ProtocolGuide: React.FC = () => {
                     </div>
 
                     <div className="w-full sm:w-auto">
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full sm:w-64 px-4 py-3 rounded-full font-sans text-sm font-medium cursor-pointer focus:outline-none"
-                            style={{
-                                background: '#ffffff',
-                                border: `1px solid ${LINE}`,
-                                color: INK,
-                            }}
-                        >
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category === 'all' ? 'All categories' : category}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="relative w-full sm:w-64">
+                                <Search
+                                    className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                                    style={{ color: MUTED }}
+                                />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search protocols..."
+                                    className="w-full pl-10 pr-9 py-3 rounded-full font-sans text-sm focus:outline-none"
+                                    style={{
+                                        background: '#ffffff',
+                                        border: `1px solid ${LINE}`,
+                                        color: INK,
+                                    }}
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                                        style={{ color: MUTED }}
+                                        aria-label="Clear search"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="w-full sm:w-64 px-4 py-3 rounded-full font-sans text-sm font-medium cursor-pointer focus:outline-none"
+                                style={{
+                                    background: '#ffffff',
+                                    border: `1px solid ${LINE}`,
+                                    color: INK,
+                                }}
+                            >
+                                {categories.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category === 'all' ? 'All categories' : category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <p className="text-[11px] font-sans mt-2 text-right" style={{ color: MUTED }}>
                             {filteredProtocols.length} protocol{filteredProtocols.length !== 1 ? 's' : ''}
                         </p>
