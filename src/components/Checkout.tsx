@@ -377,7 +377,7 @@ ${paymentMethod?.name || 'N/A'}
 ${paymentProofUrl ? 'Screenshot attached to order.' : 'Pending'}
 
 📱 PREFERRED CONTACT METHOD
-WhatsApp — 09998207315
+WhatsApp — 09696187009
 
 📋 ORDER NUMBER: ${customOrderNumber}
 
@@ -402,7 +402,7 @@ Please confirm this order. Thank you!
 
             // Auto-open WhatsApp
             setTimeout(() => {
-                const url = `https://wa.me/639998207315?text=${encodeURIComponent(orderDetails)}`;
+                const url = `https://wa.me/639696187009?text=${encodeURIComponent(orderDetails)}`;
                 window.open(url, '_blank');
             }, 1500);
         } catch (error) {
@@ -424,7 +424,7 @@ Please confirm this order. Thank you!
     };
 
     const handleOpenWhatsApp = () => {
-        const url = `https://wa.me/639998207315?text=${encodeURIComponent(orderMessage)}`;
+        const url = `https://wa.me/639696187009?text=${encodeURIComponent(orderMessage)}`;
         window.open(url, '_blank');
     };
 
@@ -506,7 +506,7 @@ Please confirm this order. Thank you!
                             </button>
 
                             <p className="text-sm text-gray-500">
-                                Your order details are auto-copied. Send the message via <span className="font-bold">WhatsApp 09998207315</span>.
+                                Your order details are auto-copied. Send the message via <span className="font-bold">WhatsApp 09696187009</span>.
                             </p>
                         </div>
 

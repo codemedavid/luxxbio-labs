@@ -37,10 +37,11 @@ function MainApp() {
         setSelectedCategory(categoryId);
     };
 
-    // Filter products based on selected category
+    // Only show available products on the storefront; filter by category on top of that
+    const availableItems = menuItems.filter(item => item.available);
     const filteredProducts = selectedCategory === 'all'
-        ? menuItems
-        : menuItems.filter(item => item.category === selectedCategory);
+        ? availableItems
+        : availableItems.filter(item => item.category === selectedCategory);
 
     return (
         <div className="min-h-screen bg-charcoal-900 font-inter flex flex-col">

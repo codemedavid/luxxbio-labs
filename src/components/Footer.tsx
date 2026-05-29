@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
                 onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.6)'; }}
               >
                 <MessageCircle className="w-4 h-4" style={{ color: '#E5BE3A' }} />
-                WhatsApp 09998207315
+                WhatsApp 09696187009
               </a>
             </div>
           </div>
